@@ -48,30 +48,30 @@ export default function Home() {
       <Header />
 
       <div className="relative w-full flex-1 pt-10 pb-10 lg:flex max-w-5xl">
-        <div className="flex-1 pr-10">
+        <div className="flex-1 lg:pr-10">
           <p className="text-zinc-700 text-sm leading-8">We accepts a list of symptoms (HPO IDs) as input and returns an ordered list of the most relevant rare conditions. The method by which relevant conditions are selected is up to your discretion.</p>
           <br/><br/>
           <HPOSelect value={currentHPOs} onChange={(value) => setCurrentHPOs(value)}/>
           <br/><br/>
-          <Fab variant="extended" onClick={handleGetDisorders}>
-            <SendIcon sx={{ mr: 1 }} />
-            Get Disorder List
-          </Fab>
+          <div className="w-full flex lg:justify-start justify-center mb-12">
+            <Fab variant="extended" onClick={handleGetDisorders}>
+              <SendIcon sx={{ mr: 1 }} />
+              Get Disorder List
+            </Fab>
+          </div>
         </div>
-        <div className="flex-1 pl-10">
-        <Box
-          sx={{ width: '100%', bgcolor: 'background.paper' }}
-        >
-          <FixedSizeList
-            height={350}
-            itemSize={90}
-            itemCount={disorders.length}
-            overscanCount={5}
-          >
-            {renderDisorderRow}
-          </FixedSizeList>
-        </Box>
-        <p className="text-xs	text-zinc-700 mt-3">* Click any of the above item to see orpha data</p>
+        <div className="flex-1 lg:pl-10">
+          <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
+            <FixedSizeList
+              height={350}
+              itemSize={90}
+              itemCount={disorders.length}
+              overscanCount={5}
+            >
+              {renderDisorderRow}
+            </FixedSizeList>
+          </Box>
+          <p className="text-xs	text-zinc-700 mt-3">* Click any of the above item to see orpha data</p>
         </div>
       </div>
 
