@@ -63,6 +63,7 @@ export default function Home() {
         <div className="flex-1 lg:pl-10">
           <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
             <FixedSizeList
+              width="100%"
               height={350}
               itemSize={90}
               itemCount={disorders.length}

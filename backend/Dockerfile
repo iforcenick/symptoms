@@ -8,4 +8,6 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
-CMD ["python3", "migration.py"] && ["python3", "main.py"]
+RUN python3 migration.py
+
+CMD ["python3", "main.py"]

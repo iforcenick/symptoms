@@ -1,4 +1,4 @@
-MYSQL_HOST='localhost'
+MYSQL_HOST='172.17.0.1'
 MYSQL_USER='user'
 MYSQL_PASSWORD='rootroot'
 MYSQL_DATABASE='symptom_db'

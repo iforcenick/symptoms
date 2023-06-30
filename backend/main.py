@@ -72,3 +72,6 @@ def get_rare_conditions():
     response = [ {"id": item[0], "orpha_code": item[1], "name": item[2], "expert_link": item[3], "freq": item[4]} for item in disorders_with_freq if item[4] > 0.00001 ]
     
     return json.dumps(response)
+
+print("Listening to 5000 port")
+app.run(host='0.0.0.0', port='5000', debug=True)
