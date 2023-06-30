@@ -1,8 +1,10 @@
 from flask import Flask, request
+from flask_cors import CORS
 from mysql.connector import connect, Error
 import json
 
 app = Flask(__name__)
+CORS(app)
 
 connection = connect(
     host="localhost",
@@ -16,7 +18,14 @@ cursor = connection.cursor()
 def get_hpo():
     cursor.execute('''SELECT * FROM hpo_table''')
     hpos = cursor.fetchall()
-    return json.dumps(hpos)
+    unique_names = set()
+    unique_hpos = []
+    for item in hpos:
+        if item[2] in unique_names:
+            continue
+        unique_names.add(item[2])
+        unique_hpos.append({"id": item[0], "legal_id": item[1], "name": item[2]})
+    return json.dumps(unique_hpos)
 
 @app.route('/rare_conditions', methods=['GET'])
 def get_rare_conditions():
