@@ -2,15 +2,16 @@ from flask import Flask, request
 from flask_cors import CORS
 from mysql.connector import connect, Error
 import json
+from cred import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 
 app = Flask(__name__)
 CORS(app)
 
 connection = connect(
-    host="localhost",
-    user="root",
-    password="rootroot",
-    database="symptom_db"
+    host=MYSQL_HOST,
+    user=MYSQL_USER,
+    password=MYSQL_PASSWORD,
+    database=MYSQL_DATABASE
 )
 cursor = connection.cursor()
 
@@ -37,7 +38,6 @@ def get_rare_conditions():
     symptoms = cursor.fetchall()
     symptom_map = {}
     for symptom in symptoms:
-        print(symptom[0])
         if symptom[0] not in symptom_map:
             symptom_map[symptom[0]] = []
         symptom_map[symptom[0]].append([ symptom[1], symptom[2], symptom[3] ])
