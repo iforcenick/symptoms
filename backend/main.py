@@ -1,5 +1,6 @@
 from flask import Flask, request
 from mysql.connector import connect, Error
+import json
 
 app = Flask(__name__)
 
@@ -11,27 +12,54 @@ connection = connect(
 )
 cursor = connection.cursor()
 
+@app.route('/hpo', methods=['GET'])
+def get_hpo():
+    cursor.execute('''SELECT * FROM hpo_table''')
+    hpos = cursor.fetchall()
+    return json.dumps(hpos)
+
 @app.route('/rare_conditions', methods=['GET'])
 def get_rare_conditions():
-    global cursor
-    cursor.execute('''SELECT * from disorder_table''')
-    disorders = cursor.fetchall()
-    print(disorders[0])
-    for disorder in disorders:
-        disorder_xml = BeautifulSoup(disorder[1], "xml")
-        asscs = disorder_xml.find_all('HPODisorderAssociation')
-        for hpo in asscs:
-            hpo_id_element = hpo.HPOId
-            hpo_id = hpo_id_element.get_text()
-            freq_element = hpo.HPOFrequency.Name
-            freq = freq_element.get_text()
-            matches = re.search('\\((.*?)(\\d+)-(\\d+)(.*?)\\)', freq)
-            min_freq = max_freq = 0
-            if matches is not None:
-                min_freq = int(matches[3])
-                max_freq = int(matches[2])
-            
     hpos_str = request.args.get('hpos')
-    hpos = hpos_str.split(",")
+    selected_hpos = [ int(item) for item in hpos_str.split(",") ]
+
+    global cursor
+    cursor.execute('''SELECT * FROM symptom_table WHERE ''' + ' OR '.join([f'hpo_id = {id}' for id in selected_hpos]))
+    symptoms = cursor.fetchall()
+    symptom_map = {}
+    for symptom in symptoms:
+        print(symptom[0])
+        if symptom[0] not in symptom_map:
+            symptom_map[symptom[0]] = []
+        symptom_map[symptom[0]].append([ symptom[1], symptom[2], symptom[3] ])
+
+
+    cursor.execute('''SELECT * FROM hpo_table''')
+    hpos = cursor.fetchall()
+    hpo_map = {}
+    for hpo in hpos:
+        hpo_map[hpo[0]] = hpo
+
+    cursor.execute('''SELECT * FROM disorder_table''')
+    disorders = cursor.fetchall()
+    disorders_with_freq = []
+    for disorder in disorders:
+        if disorder[0] not in symptom_map:
+            continue
+        hpo_list = symptom_map[disorder[0]]
+        freq = 1
+        for hpo_item in hpo_list:
+            avg_freq = (hpo_item[1] + hpo_item[2]) / 2 / 100
+            if hpo_item[0] in selected_hpos:
+                freq *= avg_freq
+            else:
+                freq *= (1.0 - avg_freq)
+        disorder_l = list(disorder)
+        disorder_l.append(freq)
+        disorders_with_freq.append(disorder_l)
     
-    return ' '.join(hpos)
+    disorders_with_freq = sorted(disorders_with_freq, key=lambda x: x[4])
+
+    response = [ {"id": item[0], "orpha_code": item[1], "name": item[2], "expert_link": item[3], "freq": item[4]} for item in disorders_with_freq if item[4] > 0.00001 ]
+    
+    return json.dumps(response)
